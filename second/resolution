@@ -1,0 +1,1 @@
+O método aplicado anteriormente usava o método recursivo, porém diversas 'instâncias' do método ficavam na memória quando se solicitava um número elevado. O método aplicado começa do menor número até o número selecionado e apenas retorna o valor quando está completo.
