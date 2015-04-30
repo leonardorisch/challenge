@@ -29,11 +29,12 @@ class CommandRunner():
 
 class InstallGit():
 
-    self.user = 'aaa'
-    self.email = 'sss'
-    self.eol = 'teste'
-    self.pack_limit = ''
-    self.post_buffer = ''
+    def __init__(self):
+        self.user = 'aaa'
+        self.email = 'sss'
+        self.eol = 'teste'
+        self.pack_limit = ''
+        self.post_buffer = ''
 
     def execute(self):
 
