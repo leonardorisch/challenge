@@ -1,0 +1,128 @@
+# Review this code, taking into account good practices for software development and design patterns.
+# If you are familiar with Python, also feel free to suggest a more 'pythonic' solution.
+# Assume that the code works as is, there is no need to review functionality, only syntax/style/reusability/etc.
+
+# -------------------------------------------------------------------------------------------------
+
+# For the sake of brevity in this test, pretend that all magic* functions works exactly as expected.
+import magic_install
+import requests
+
+
+
+class command_runner():
+    def __init__(self, command):
+        self.command = command
+
+
+    def ex(self):
+        result = self.command.execute()
+
+        if result == 408:
+            print 'git install error'
+        if result == 407:
+            print 'svn install error'
+
+        return result
+
+
+
+class install_and_configure_git_command():
+    def execute(self, user, email, eol, pck_lim, post_buf):
+        '''
+
+        :param user:
+        :param email:
+        :param eol:
+        :param pck_lim:
+        :param post_buf:
+        '''
+        res = requests.get(
+            'https://esss.com.br/site/dev/downloads/tools/git',
+            auth=('download_user', 'my_secret_password'),
+            timeout=100,
+            allow_redirects=True,  # Must be enabled for our server,
+            verify=False,  # Server is not signed,
+            stream=True  # For downloading files
+        )
+
+        f = 'D:/downloads/git'
+        gf = open(f, 'wb')
+        for chunk in res.iter_content(chunk_size=1024):
+            gf.write(chunk)
+#             if chunk:
+#                 f.write(chunk)
+#                 f.flush()
+
+        try:
+            magic_install(gf)
+        except:
+            return 408
+
+        self.configure_git(user, email, eol, pck_lim, post_buf)
+
+        return 0
+
+
+    def configure_git(self, user, email, eol, pck_lim, post_buf):
+        import magic_git_config
+        magic_git_config('user.name', user)
+        magic_git_config('user.email', email)
+        magic_git_config('core.eol', eol)
+        magic_git_config('pack.packsizelimit', pck_lim)
+        magic_git_config('http.postbuffer', post_buf)
+
+        return 0
+
+
+class configure_git_command(install_and_configure_git_command):
+    # Override from superclass (install_and_configure_git_command) since we only want to config
+    def execute(self, user, email, eol, pck_lim, post_buf):
+        self.configure_git(user, email, eol, pck_lim, post_buf)
+        return 0
+
+
+
+class InstallSVN_command():
+    '''
+    Command to install SVN in a user's machine
+    '''
+    def execute(self):
+        res = requests.get(
+            'https://esss.com.br/site/dev/downloads/tools/git',
+            auth=('download_user', 'my_secret_password'),
+            timeout=100,
+            allow_redirects=True,  # Must be enabled for our server,
+            verify=False,  # Server is not signed,
+            stream=True  # For downloading files
+        )
+
+        f = 'D:/downloads/svn'
+        gf = open(f, 'wb')
+        for chunk in res.iter_content(chunk_size=1024):
+            # write chunk in file
+            gf.write(chunk)
+
+        try:
+            magic_install(gf)
+        except:
+            return 407
+
+        return 0
+
+
+
+#===================================================================================================
+# Main
+#===================================================================================================
+if __name__ == '__main__':
+
+    import sys
+    if sys.argv[1] == 'install':
+        if sys.argv[2] == 'git':
+            cmd = command_runner(install_and_configure_git_command())
+        if sys.argv[2] == 'svn':
+            cmd = command_runner(InstallSVN_command())
+
+    result = cmd.ex()
+    sys.exit(result)
